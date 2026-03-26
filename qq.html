@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>狗狗性格测试 · 24小时限时</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #f9f0e0 0%, #f5e0c8 100%);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 650px;
+            width: 100%;
+            background: white;
+            border-radius: 48px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .header {
+            background: #ffb347;
+            padding: 28px 24px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 8px;
+        }
+        .content {
+            padding: 30px 28px;
+        }
+        .question {
+            margin-bottom: 28px;
+            border-bottom: 1px solid #f0e6dc;
+            padding-bottom: 20px;
+        }
+        .question-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 14px;
+            color: #3a2c2a;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fefaf5;
+            padding: 10px 16px;
+            border-radius: 40px;
+            border: 1px solid #f0e0d0;
+            cursor: pointer;
+        }
+        .option:hover {
+            background: #fff2e6;
+            border-color: #ffb347;
+        }
+        input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #ff9f4a;
+            cursor: pointer;
+        }
+        .option label {
+            flex: 1;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: #3e3a35;
+        }
+        .btn-submit {
+            background: #ff9f4a;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 60px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .btn-submit:hover {
+            background: #f2892c;
+        }
+        .expired-box {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .expired-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .expired-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #d97706;
+            margin-bottom: 12px;
+        }
+        .expired-desc {
+            color: #6b4e2e;
+            margin-bottom: 24px;
+        }
+        .result-area {
+            text-align: center;
+        }
+        .result-icon {
+            font-size: 70px;
+            margin-bottom: 12px;
+        }
+        .result-title {
+            font-size: 1.7rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #4a2a1e;
+        }
+        .result-desc {
+            color: #5e4b3c;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .timer {
+            background: #f0e8dc;
+            border-radius: 32px;
+            padding: 14px;
+            margin-top: 20px;
+        }
+        .timer-label {
+            font-size: 13px;
+            color: #8f735b;
+        }
+        .timer-value {
+            font-size: 28px;
+            font-weight: bold;
+            font-family: monospace;
+            color: #c96f0e;
+        }
+        footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 12px;
+            color: #b28b65;
+            background: #fef7ef;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="app">
+    <div class="header">
+        <h1>🐕 狗狗性格综合评估</h1>
+        <p>15道题 · 测出你家毛孩子的专属类型</p>
+    </div>
+
+    <!-- 正常测试区域 -->
+    <div id="testArea" class="content">
+        <form id="testForm"></form>
+        <button class="btn-submit" id="submitBtn">✨ 查看结果 ✨</button>
+    </div>
+
+    <!-- 结果展示区域（测试完成后显示） -->
+    <div id="resultArea" class="content hidden">
+        <div class="result-icon" id="resultIcon">🐕</div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-desc" id="resultDesc"></div>
+        <div class="timer">
+            <div class="timer-label">⏰ 此链接将在以下时间后失效</div>
+            <div class="timer-value" id="countdown">--:--:--</div>
+        </div>
+        <button class="btn-submit" id="resetBtn" style="background:#ccc; margin-top:20px;">重新测试（将刷新链接）</button>
+    </div>
+
+    <!-- 过期提示区域 -->
+    <div id="expiredArea" class="content hidden">
+        <div class="expired-box">
+            <div class="expired-icon">⏰</div>
+            <div class="expired-title">测试链接已失效</div>
+            <div class="expired-desc">该测试链接仅24小时有效，现已过期。<br>如需再次参与，请联系发布者获取新链接。</div>
+        </div>
+    </div>
+
+    <footer>🐾 结果仅供参考，每只狗狗都是独一无二的小天使</footer>
+</div>
+
+<script>
+    // ======================== 题目数据 ========================
+    const questions = [
+        { text: "1. 带狗狗外出散步时，它遇到陌生人的第一反应是？", options: ["热情摇尾巴，主动凑上去求摸", "保持警惕观察，但不叫也不躲", "躲在我身后，需要我安抚才敢靠近", "直接吠叫，表现出敌意"], scores: [1,2,3,4] },
+        { text: "2. 在狗公园或遛狗时，狗狗遇到其他狗的反应是？", options: ["主动跑过去玩耍，喜欢社交", "先观察一下，对方友善才靠近", "绕开走，不太想互动", "对着其他狗低吼或吠叫"], scores: [1,2,3,4] },
+        { text: "3. 当您出门上班或外出，把狗狗单独留在家时，它通常会？", options: ["安静睡觉或自己玩，回家时一切正常", "偶尔会叫几声，但很快安静下来", "会拆家、乱咬东西或随地大小便", "长时间哀鸣/吠叫，邻居都投诉过"], scores: [1,2,3,4] },
+        { text: "4. 您回家开门的那一刻，狗狗的反应是？", options: ["飞速冲过来迎接，躺倒露出肚皮求抚摸", "开心迎接，亲热一下后继续玩自己的", "慢悠悠走出来，像刚睡醒一样", "没什么特别反应，继续躺着"], scores: [1,2,3,4] },
+        { text: "5. 当您发出“坐下”或“趴下”等指令时，狗狗的反应是？", options: ["立刻执行，训练敏感度高", "需要重复2-3次才理解", "偶尔听从，有时故意不理", "完全不理会，当没听见"], scores: [1,2,3,4] },
+        { text: "6. 用玩具和狗狗玩拔河游戏时，您发出“松开”指令，它会？", options: ["立刻松口，听话放弃玩具", "犹豫一下，但最终还是松开", "意犹未尽，继续拽着不放", "低吼护着玩具，不让我碰"], scores: [1,2,3,4] },
+        { text: "7. 狗狗在进食时，您突然靠近它的食盆，它会？", options: ["停止吃饭，抬头看着我", "继续吃饭，毫不在意", "吃得快了一点，但没有攻击行为", "停止吃饭，开始低吼或护食"], scores: [1,2,3,4] },
+        { text: "8. 当您长时间玩手机或看电视，没有搭理狗狗时，它会？", options: ["自己睡觉去了，完全不在意", "蜷缩在我脚边或附近睡觉", "隔一段时间过来招惹我一下", "用爪子扒拉我，或把玩具放我腿上"], scores: [1,2,3,4] },
+        { text: "9. 听到雷声、鞭炮声或家里突然有很大声响时，狗狗会？", options: ["被吓一跳，但很快恢复正常", "跑到窗前或门口查看怎么回事", "惊慌失措，立刻跑到我身边躲着", "躲在角落发抖，很久才能平静"], scores: [1,2,3,4] },
+        { text: "10. 当您情绪低落或伤心时，狗狗的反应是？", options: ["能感觉到，会过来蹭蹭或安静陪着", "和平常一样，没什么特别反应", "反而比平时更闹腾，好像想逗我开心", "会躲开，似乎不喜欢这种氛围"], scores: [1,2,3,4] },
+        { text: "11. 家里来陌生客人时，狗狗通常会？", options: ["热情摇尾巴，主动上前互动", "保持警惕观察，但不会攻击", "躲起来或回避陌生人", "直接对着客人吠叫"], scores: [1,2,3,4] },
+        { text: "12. 狗狗对洗澡和美容的态度？", options: ["非常享受，很配合", "可以接受，但不太喜欢", "勉强忍耐，会挣扎", "极度抗拒，每次都要斗智斗勇"], scores: [1,2,3,4] },
+        { text: "13. 您叫狗狗的名字，它回头的速度？", options: ["立刻回头并跑过来", "会回头看看，但不过来", "偶尔抬头，继续做自己的事", "完全不理，当没听见"], scores: [1,2,3,4] },
+        { text: "14. 狗狗在户外牵绳散步时，会拽着绳子向前冲吗？", options: ["从来不会，随行很好", "偶尔会，稍微拉一下能回来", "经常拽着走，力气大", "一直拽着冲，完全不顾主人"], scores: [1,2,3,4] },
+        { text: "15. 狗狗是否愿意分享玩具或零食给其他狗/人？", options: ["非常乐意，主动分享", "可以，但不会主动", "不愿意，会护着", "攻击性护食/护玩具"], scores: [1,2,3,4] }
+    ];
+
+    const resultMap = [
+        { min: 15, max: 25, title: "🐕 天使狗狗·社交达人", desc: "性格稳定、亲人亲狗、服从性好，是传说中的“别人家的狗”。适合家庭陪伴，也适合带去各种社交场合。", icon: "🐕‍🦺" },
+        { min: 26, max: 35, title: "🐕‍🦺 稳重乖宝·观察型", desc: "性格温和但有点慢热，需要一点时间适应新环境。对主人忠诚，是很好的家庭伴侣。", icon: "🐕" },
+        { min: 36, max: 45, title: "🐕 敏感小可爱·需要安全感", desc: "性格偏敏感，容易焦虑，对新环境和新事物适应较慢。需要主人多给耐心和安全感。", icon: "🐾" },
+        { min: 46, max: 60, title: "🐕 个性倔强·独立派", desc: "性格独立、有主见，可能有护食、领地意识等行为。需要专业的正向训练引导，不适合新手主人。", icon: "🐺" }
+    ];
+
+    const STORAGE_KEY = 'dog_test_submit_time'; // 存储提交时间戳
+
+    // 检查是否已提交且未过期
+    function checkExpired() {
+        const submitTime = localStorage.getItem(STORAGE_KEY);
+        if (!submitTime) return false; // 从未提交
+        const now = Date.now();
+        const diff = now - parseInt(submitTime);
+        if (diff > 24 * 60 * 60 * 1000) {
+            // 已过期，显示过期页面
+            showExpired();
+            return true;
+        }
+        // 未过期，显示结果页面并倒计时
+        showResultFromStorage();
+        return true;
+    }
+
+    // 显示过期页面
+    function showExpired() {
+        document.getElementById('testArea').classList.add('hidden');
+        document.getElementById('resultArea').classList.add('hidden');
+        document.getElementById('expiredArea').classList.remove('hidden');
+    }
+
+    // 显示结果页面（从存储中获取结果数据）
+    function showResultFromStorage() {
+        const storedResult = localStorage.getItem('dog_test_result');
+        if (!storedResult) {
+            // 理论上不应该发生，但兜底：跳转到测试
+            resetAndRestart();
+            return;
+        }
+        const result = JSON.parse(storedResult);
+        const submitTime = parseInt(localStorage.getItem(STORAGE_KEY));
+        const remaining = submitTime + 24*60*60*1000 - Date.now();
+
+        document.getElementById('testArea').classList.add('hidden');
+        document.getElementById('expiredArea').classList.add('hidden');
+        const resultArea = document.getElementById('resultArea');
+        resultArea.classList.remove('hidden');
+
+        document.getElementById('resultIcon').innerText = result.icon;
+        document.getElementById('resultTitle').innerText = result.title;
+        document.getElementById('resultDesc').innerText = result.desc;
+
+        startCountdown(remaining, document.getElementById('countdown'));
+    }
+
+    // 开始倒计时
+    function startCountdown(remainingMs, element) {
+        function update() {
+            if (remainingMs <= 0) {
+                element.innerText = '已失效';
+                return;
+            }
+            const hours = Math.floor(remainingMs / (60*60*1000));
+            const minutes = Math.floor((remainingMs % (60*60*1000)) / (60*1000));
+            const seconds = Math.floor((remainingMs % (60*1000)) / 1000);
+            element.innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+        }
+        update();
+        const interval = setInterval(() => {
+            remainingMs -= 1000;
+            if (remainingMs <= 0) {
+                clearInterval(interval);
+                element.innerText = '已失效';
+                // 可选：显示过期页面
+                showExpired();
+            } else {
+                update();
+            }
+        }, 1000);
+    }
+
+    // 提交测试并存储结果
+    function submitTest() {
+        const total = calculateScore();
+        if (total === null) {
+            alert('请回答完所有问题～');
+            return false;
+        }
+        const result = getResultByScore(total);
+        const submitTime = Date.now();
+        localStorage.setItem(STORAGE_KEY, submitTime.toString());
+        localStorage.setItem('dog_test_result', JSON.stringify(result));
+
+        // 显示结果页
+        document.getElementById('testArea').classList.add('hidden');
+        document.getElementById('expiredArea').classList.add('hidden');
+        const resultArea = document.getElementById('resultArea');
+        resultArea.classList.remove('hidden');
+
+        document.getElementById('resultIcon').innerText = result.icon;
+        document.getElementById('resultTitle').innerText = result.title;
+        document.getElementById('resultDesc').innerText = result.desc;
+
+        const remaining = 24*60*60*1000;
+        startCountdown(remaining, document.getElementById('countdown'));
+        return true;
+    }
+
+    // 重置：清除存储，刷新页面（相当于重新开始）
+    function resetAndRestart() {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('dog_test_result');
+        location.reload();
+    }
+
+    // 渲染题目
+    function renderQuestions() {
+        const form = document.getElementById('testForm');
+        form.innerHTML = '';
+        questions.forEach((q, idx) => {
+            const div = document.createElement('div');
+            div.className = 'question';
+            div.innerHTML = `<div class="question-text">${q.text}</div><div class="options"></div>`;
+            const optsDiv = div.querySelector('.options');
+            q.options.forEach((opt, optIdx) => {
+                const optDiv = document.createElement('div');
+                optDiv.className = 'option';
+                const radioId = `q${idx}_opt${optIdx}`;
+                optDiv.innerHTML = `
+                    <input type="radio" name="q${idx}" value="${optIdx}" id="${radioId}">
+                    <label for="${radioId}">${opt}</label>
+                `;
+                optsDiv.appendChild(optDiv);
+            });
+            form.appendChild(div);
+        });
+    }
+
+    function calculateScore() {
+        let total = 0;
+        for (let i = 0; i < questions.length; i++) {
+            const selected = document.querySelector(`input[name="q${i}"]:checked`);
+            if (!selected) return null;
+            const optIndex = parseInt(selected.value);
+            total += questions[i].scores[optIndex];
+        }
+        return total;
+    }
+
+    function getResultByScore(score) {
+        for (let res of resultMap) {
+            if (score >= res.min && score <= res.max) return res;
+        }
+        return resultMap[1];
+    }
+
+    // 页面初始化
+    renderQuestions();
+    if (checkExpired()) {
+        // 已经提交过且未过期，或已过期，函数内部已处理显示
+    } else {
+        // 未提交，显示测试区域
+        document.getElementById('testArea').classList.remove('hidden');
+        document.getElementById('resultArea').classList.add('hidden');
+        document.getElementById('expiredArea').classList.add('hidden');
+        // 绑定提交按钮
+        document.getElementById('submitBtn').onclick = () => submitTest();
+        document.getElementById('resetBtn').onclick = () => resetAndRestart();
+    }
+</script>
+</body>
+</html>
